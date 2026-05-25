@@ -1,1 +1,1 @@
-web: gunicorn recipe_project.wsgi --log-file -
+web: bash scripts/start.sh

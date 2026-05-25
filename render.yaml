@@ -8,8 +8,8 @@ services:
     region: oregon
     repo: <REPO_URL> # replace with your repo URL or set via Render UI
     branch: main
-    buildCommand: "pip install -r requirements.txt"
-    startCommand: "gunicorn recipe_project.wsgi --log-file -"
+    buildCommand: "bash build.sh"
+    startCommand: "bash scripts/start.sh"
     envVars:
       - key: SECRET_KEY
         scope: env
