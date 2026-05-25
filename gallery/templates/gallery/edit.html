@@ -19,7 +19,13 @@
 
     <div class="upload-section">
         <h2 style="margin-top: 0;">Edit Recipe: {{ photo.title }}</h2>
-        
+        {% if messages %}
+            <div style="margin-bottom: 1rem;">
+                {% for message in messages %}
+                    <div style="padding: 1rem; border-radius: 10px; margin-bottom: 0.75rem; background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe;">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
         <!-- Show current image as a reminder -->
         <p style="margin-bottom: 0.5rem; color: #666;">Current Image:</p>
         {% if photo.image %}

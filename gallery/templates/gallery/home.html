@@ -51,18 +51,13 @@
                 {% endif %}
             </div>
         </div>
-
-        <div style="max-width: 600px; margin: 0 auto 2rem auto;">
-            <form method="GET" style="display: flex; gap: 10px;">
-                <input type="text" name="q" value="{{ query }}" placeholder="Search recipes..." class="form-control" style="margin: 0;">
-                <button type="submit" class="btn-submit" style="width: auto;">Search</button>
-                {% if query %}<a href="/" class="btn-submit" style="width: auto; background: #999; text-decoration: none;">Clear</a>{% endif %}
-            </form>
-        </div>
-
-        <div class="upload-section">
-            <h2 style="margin-top: 0;">Upload New Photo</h2>
-            <form method="POST" enctype="multipart/form-data">
+        {% if messages %}
+            <div style="max-width: 600px; margin: 1rem auto;">
+                {% for message in messages %}
+                    <div style="padding: 1rem; border-radius: 10px; margin-bottom: 0.75rem; background: #fff5f5; color: #b91c1c; border: 1px solid #f8d7da;">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
                 {% csrf_token %}
                 <p>
                     {{ form.title.label_tag }}
