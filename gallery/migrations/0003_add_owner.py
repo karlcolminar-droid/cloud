@@ -1,5 +1,4 @@
-from django.db import migrations, models
-import django.conf
+from django.db import migrations
 
 
 class Migration(migrations.Migration):
@@ -9,9 +8,4 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AddField(
-            model_name='recipephoto',
-            name='owner',
-            field=models.ForeignKey(blank=True, null=True, on_delete=models.deletion.CASCADE, related_name='photos', to=django.conf.settings.AUTH_USER_MODEL),
-        ),
     ]
