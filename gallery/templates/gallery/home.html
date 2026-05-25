@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloudinary Recipe Gallery</title>
+    <style>
+        :root { --primary: #ff6b6b; --bg: #f8f9fa; --card-bg: #ffffff; --text: #333; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 2rem; }
+        
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header { text-align: center; margin-bottom: 3rem; }
+        .header h1 { color: var(--primary); font-size: 2.5rem; margin-bottom: 0.5rem; }
+        
+        /* Form Styling */
+        .upload-section { background: var(--card-bg); padding: 2rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 3rem; max-width: 600px; margin-left: auto; margin-right: auto; }
+        .form-control { width: 100%; padding: 0.75rem; margin-top: 0.5rem; margin-bottom: 1rem; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+        .btn-submit { background: var(--primary); color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; font-size: 1rem; cursor: pointer; width: 100%; transition: background 0.2s; }
+        .btn-submit:hover { background: #fa5252; }
+
+        /* Gallery Grid */
+        .gallery-grid { 
+            display: flex; 
+            flex-wrap: wrap; 
+            justify-content: center; 
+            gap: 2rem; }
+        .card { background: var(--card-bg); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: transform 0.2s; width: 320px; 
+            flex: 0 0 auto;}
+        .card:hover { transform: translateY(-5px); }
+        
+        /* Cloudinary Image Container */
+        .img-container { width: 100%; height: 250px; background: #eee; }
+        .img-container img { width: 100%; height: 100%; object-fit: cover; }
+        
+        .card-body { padding: 1.5rem; }
+        .card-title { margin: 0 0 0.5rem 0; font-size: 1.25rem; }
+        .card-text { color: #666; font-size: 0.9rem; margin: 0; }
+        .date { font-size: 0.8rem; color: #999; margin-top: 1rem; display: block; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Recipe Asset Manager</h1>
+            <p>Enterprise Grade Image Processing</p>
+            <div style="margin-top: 1rem; color: #555; font-size: 0.95rem;">
+                {% if request.user.is_authenticated %}
+                    Logged in as <strong>{{ request.user.username }}</strong> · <a href="{% url 'logout' %}" style="color: inherit; text-decoration: underline;">Logout</a>
+                {% else %}
+                    <a href="{% url 'login' %}" style="color: inherit; text-decoration: underline;">Login to upload or manage recipes</a>
+                {% endif %}
+            </div>
+        </div>
+
+        <div style="max-width: 600px; margin: 0 auto 2rem auto;">
+            <form method="GET" style="display: flex; gap: 10px;">
+                <input type="text" name="q" value="{{ query }}" placeholder="Search recipes..." class="form-control" style="margin: 0;">
+                <button type="submit" class="btn-submit" style="width: auto;">Search</button>
+                {% if query %}<a href="/" class="btn-submit" style="width: auto; background: #999; text-decoration: none;">Clear</a>{% endif %}
+            </form>
+        </div>
+
+        <div class="upload-section">
+            <h2 style="margin-top: 0;">Upload New Photo</h2>
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <p>
+                    {{ form.title.label_tag }}
+                    {{ form.title }}
+                </p>
+                <p>
+                    {{ form.description.label_tag }}
+                    {{ form.description }}
+                </p>
+                <p>
+                    {{ form.image.label_tag }}
+                    {{ form.image }}
+                    <span style="display:block; margin-top:0.25rem; font-size:0.9rem; color:#555;">Click the file chooser to select a local image from your computer.</span>
+                </p>
+                <button type="submit" class="btn-submit">Upload Recipe</button>
+            </form>
+            <p style="margin-top: 1rem; color: #555; font-size: 0.95rem;">
+                Your local images can be uploaded from the form above. If you are logged in and own a photo, click its image in the gallery to edit or delete it.
+            </p>
+        </div>
+
+        <div class="gallery-grid">
+            {% for photo in photos %}
+            <div class="card">
+                <div class="img-container">
+                    {% if photo.image %}
+                        {% if request.user.is_authenticated %}
+                            {% if request.user.is_staff or photo.owner == request.user %}
+                                <a href="{% url 'edit_recipe' photo.pk %}">
+                                    <img src="{{ photo.image.url }}" alt="{{ photo.title }}" style="cursor: pointer; transition: opacity 0.2s;" onmouseover="this.style.opacity=0.8" onmouseout="this.style.opacity=1">
+                                </a>
+                            {% else %}
+                                <img src="{{ photo.image.url }}" alt="{{ photo.title }}" style="transition: opacity 0.2s;" onmouseover="this.style.opacity=0.8" onmouseout="this.style.opacity=1">
+                            {% endif %}
+                        {% else %}
+                            <img src="{{ photo.image.url }}" alt="{{ photo.title }}" style="transition: opacity 0.2s;" onmouseover="this.style.opacity=0.8" onmouseout="this.style.opacity=1">
+                        {% endif %}
+                    {% else %}
+                        <div style="width:100%;height:250px;background:#ddd;display:flex;align-items:center;justify-content:center;color:#888;">No image</div>
+                    {% endif %}
+                </div>
+
+                <div class="card-body">
+                    <h3 class="card-title">{{ photo.title }}</h3>
+                    <p class="card-text">{{ photo.description|truncatewords:15 }}</p>
+                    <span class="date">Uploaded: {{ photo.uploaded_at|date:"M d, Y" }}</span>
+                    {% if request.user.is_authenticated %}
+                        {% if request.user.is_staff or photo.owner == request.user %}
+                            <div style="margin-top: 1rem; display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                                <a href="{% url 'edit_recipe' photo.pk %}" class="btn-submit" style="background: #2563eb; width: auto; padding: 0.75rem 1rem;">Edit</a>
+                                <a href="{% url 'delete_recipe' photo.pk %}" class="btn-submit" style="background: #ef4444; width: auto; padding: 0.75rem 1rem;">Delete</a>
+                            </div>
+                            <p style="margin-top: 0.75rem; font-size: 0.8rem; color: var(--primary);">
+                                <em>Use the buttons above to update or remove this recipe.</em>
+                            </p>
+                        {% else %}
+                            <p style="margin-top: 10px; font-size: 0.8rem; color: var(--primary);">
+                                <em>Log in to edit or delete your own photos.</em>
+                            </p>
+                        {% endif %}
+                    {% else %}
+                        <p style="margin-top: 10px; font-size: 0.8rem; color: var(--primary);">
+                            <em>Log in to edit or delete your own photos.</em>
+                        </p>
+                    {% endif %}
+                </div>
+            </div>
+            {% empty %}
+            <div style="grid-column: 1 / -1; text-align: center; color: #999;">
+                <p>No recipes found.</p>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% if photos.has_other_pages %}
+        <div style="text-align: center; margin-top: 3rem;">
+            <span style="background: var(--card-bg); padding: 10px 20px; border-radius: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                {% if photos.has_previous %}
+                    <a href="?page={{ photos.previous_page_number }}{% if query %}&q={{ query }}{% endif %}" style="text-decoration: none; color: var(--primary); font-weight: bold;">&laquo; Previous</a>
+                {% endif %}
+                
+                <span style="margin: 0 15px; color: #666;">Page {{ photos.number }} of {{ photos.paginator.num_pages }}</span>
+                
+                {% if photos.has_next %}
+                    <a href="?page={{ photos.next_page_number }}{% if query %}&q={{ query }}{% endif %}" style="text-decoration: none; color: var(--primary); font-weight: bold;">Next &raquo;</a>
+                {% endif %}
+            </span>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>

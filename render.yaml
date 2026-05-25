@@ -1,0 +1,39 @@
+# Render service manifest for Photo Album Management
+# Configure secrets in the Render dashboard or via CLI; do NOT commit real secrets.
+services:
+  - type: web
+    name: recipe-project-web
+    env: python
+    plan: starter
+    region: oregon
+    repo: <REPO_URL> # replace with your repo URL or set via Render UI
+    branch: main
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "gunicorn recipe_project.wsgi --log-file -"
+    envVars:
+      - key: SECRET_KEY
+        scope: env
+        value: ""
+      - key: DEBUG
+        scope: env
+        value: "False"
+      - key: DATABASE_URL
+        scope: env
+        value: ""
+      - key: CLOUDINARY_CLOUD_NAME
+        scope: env
+        value: ""
+      - key: CLOUDINARY_API_KEY
+        scope: env
+        value: ""
+      - key: CLOUDINARY_API_SECRET
+        scope: env
+        value: ""
+      - key: ALLOWED_HOSTS
+        scope: env
+        value: ""
+    autoDeploy: true
+    healthCheckPath: /
+    plan: free
+
+# Post-deploy commands: run migrations after deploy via Render dashboard (or use a deploy hook)
